@@ -1,0 +1,752 @@
+<!doctype html>
+<html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CaptainPro | نسخة تجهيز غير منشورة</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<script src="https://cdn.tailwindcss.com/3.4.17"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@600;700;800;900&family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg: #F4F7F6;
+    --surface: #FFFFFF;
+    --surface-2: #ECF1EF;
+    --border: #D7E0DE;
+    --fg: #0D1F1B;
+    --muted: #5B6D69;
+    --accent: #0F766E;
+    --accent-strong: #0B5B55;
+    --accent-ink: #FFFFFF;
+    --accent-soft: #E3F3F0;
+    --gold: #B9820F;
+    --gold-ink: #241A04;
+    --gold-soft: #FBF0DA;
+    --good: #15803D;
+    --warn: #B45309;
+    --critical: #DC2626;
+    --critical-soft: #FCE8E6;
+    --shadow: 0 10px 28px -14px rgba(13,31,27,0.22);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0B1416;
+      --surface: #11201F;
+      --surface-2: #16302C;
+      --border: #234039;
+      --fg: #EAF3F0;
+      --muted: #8FA6A0;
+      --accent: #2DD4BF;
+      --accent-strong: #5EEAD4;
+      --accent-ink: #06211D;
+      --accent-soft: #113632;
+      --gold: #E3B341;
+      --gold-ink: #241A04;
+      --gold-soft: #2A2213;
+      --good: #1FA866;
+      --warn: #C97A14;
+      --critical: #F87171;
+      --critical-soft: #3A1715;
+      --shadow: 0 10px 28px -14px rgba(0,0,0,0.5);
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0B1416;
+    --surface: #11201F;
+    --surface-2: #16302C;
+    --border: #234039;
+    --fg: #EAF3F0;
+    --muted: #8FA6A0;
+    --accent: #2DD4BF;
+    --accent-strong: #5EEAD4;
+    --accent-ink: #06211D;
+    --accent-soft: #113632;
+    --gold: #E3B341;
+    --gold-ink: #241A04;
+    --gold-soft: #2A2213;
+    --good: #1FA866;
+    --warn: #C97A14;
+    --critical: #F87171;
+    --critical-soft: #3A1715;
+    --shadow: 0 10px 28px -14px rgba(0,0,0,0.5);
+    color-scheme: dark;
+  }
+
+  body {
+    font-family: 'Tajawal', sans-serif;
+    background: var(--bg);
+    color: var(--fg);
+    padding-left: max(16px, env(safe-area-inset-left, 0px));
+    padding-right: max(16px, env(safe-area-inset-right, 0px));
+  }
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0 0 auto;
+    height: env(safe-area-inset-top, 0px);
+    background: var(--bg);
+    z-index: 40;
+  }
+  h1, h2, h3, .font-cairo { font-family: 'Cairo', sans-serif; }
+  .tabular { font-variant-numeric: tabular-nums; }
+
+  /* ---------- tabs ---------- */
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; animation: panelIn .38s ease both; }
+  @keyframes panelIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+  .tab-btn {
+    display: inline-flex; align-items: center; gap: .4rem;
+    color: var(--muted); border: 1px solid transparent;
+    transition: background .15s ease, color .15s ease, border-color .15s ease;
+  }
+  .tab-btn:hover { background: var(--surface-2); color: var(--fg); }
+  .tab-btn.active { background: var(--accent-soft); color: var(--accent-strong); border-color: var(--accent); font-weight: 700; }
+  .tab-btn svg { width: 16px; height: 16px; flex: none; }
+
+  /* ---------- surfaces ---------- */
+  .panel { background: var(--surface); border: 1px solid var(--border); }
+  .stat { background: var(--surface); border: 1px solid var(--border); border-inline-start: 4px solid var(--accent); }
+  .stat.is-good { border-inline-start-color: var(--good); }
+  .stat.is-critical { border-inline-start-color: var(--critical); }
+  .stat.is-warn { border-inline-start-color: var(--warn); }
+  .field { background: var(--surface-2); border: 1px solid var(--border); color: var(--fg); }
+  .field::placeholder { color: var(--muted); }
+  .btn-primary {
+    background: var(--accent); color: var(--accent-ink); font-weight: 700;
+    transition: filter .15s ease, transform .1s ease;
+  }
+  .btn-primary:hover { filter: brightness(1.08); }
+  .btn-primary:active { transform: scale(.98); }
+  .link-action { color: var(--accent-strong); }
+  .link-danger { color: var(--critical); }
+  .muted { color: var(--muted); }
+  .divider { border-color: var(--border); }
+  .row-hover:hover { background: var(--surface-2); }
+
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
+
+  /* ---------- collection-rate hero ring ---------- */
+  .rate-ring {
+    --pct: 0;
+    width: 132px; height: 132px; border-radius: 999px;
+    background: conic-gradient(var(--gold) calc(var(--pct) * 1%), var(--surface-2) 0);
+    display: flex; align-items: center; justify-content: center;
+    transition: background 1s cubic-bezier(.22,.61,.36,1);
+    flex: none;
+  }
+  .rate-ring::after {
+    content: ""; position: absolute;
+  }
+  .rate-ring-inner {
+    width: 104px; height: 104px; border-radius: 999px; background: var(--surface);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .tab-panel.active { animation: none; }
+    .rate-ring { transition: none; }
+    .btn-primary, .tab-btn { transition: none; }
+  }
+</style>
+</head><body>
+<div lang="ar" dir="rtl" class="min-h-screen" style="background:var(--bg)">
+
+  <!-- شريط التحذير من انتهاء الترخيص -->
+  <div id="licenseBanner" class="hidden text-center text-sm font-bold py-2 px-4" style="background:var(--critical);color:#fff"></div>
+
+  <!-- الهيدر -->
+  <header class="sticky z-30 backdrop-blur" style="top:env(safe-area-inset-top, 0px); background:color-mix(in srgb, var(--surface) 88%, transparent); border-bottom:1px solid var(--border);">
+    <div class="max-w-6xl mx-auto px-1 py-3 flex flex-wrap items-center justify-between gap-3">
+      <div class="flex items-center gap-2.5">
+        <div class="w-9 h-9 rounded-lg flex items-center justify-center" style="background:var(--accent)">
+          <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="var(--accent-ink)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 2l7 3v6c0 5-3.2 8.5-7 10-3.8-1.5-7-5-7-10V5l7-3z"/>
+            <path d="M9.5 12l1.8 1.8L15 10.3"/>
+          </svg>
+        </div>
+        <span class="font-cairo font-extrabold text-sm sm:text-base" style="color:var(--fg)">بوابة إدارة الأكاديمية</span>
+      </div>
+      <nav class="flex flex-wrap gap-1" id="tabNav"></nav>
+    </div>
+  </header>
+
+  <main class="max-w-6xl mx-auto px-1 py-6">
+
+    <!-- تبويب: نظرة عامة -->
+    <section class="tab-panel active" data-tab="overview">
+      <h2 class="text-xl font-cairo font-extrabold mb-4">نظرة عامة على الأداء</h2>
+
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-5">
+        <div class="stat rounded-lg p-4">
+          <span class="text-xs muted">إجمالي اللاعبين</span>
+          <div class="text-2xl font-cairo font-extrabold mt-1 tabular" id="ovTotalPlayers">—</div>
+        </div>
+        <div class="stat is-good rounded-lg p-4">
+          <span class="text-xs muted">المحصّل (مدفوع)</span>
+          <div class="text-2xl font-cairo font-extrabold mt-1 tabular" id="ovCollected" style="color:var(--good)">—</div>
+        </div>
+        <div class="stat is-critical rounded-lg p-4">
+          <span class="text-xs muted">متأخرات (فات ميعادها)</span>
+          <div class="text-2xl font-cairo font-extrabold mt-1 tabular" id="ovOverdue" style="color:var(--critical)">—</div>
+        </div>
+        <div class="stat is-warn rounded-lg p-4">
+          <span class="text-xs muted">مستحقات قادمة</span>
+          <div class="text-2xl font-cairo font-extrabold mt-1 tabular" id="ovUpcoming" style="color:var(--warn)">—</div>
+        </div>
+      </div>
+
+      <div class="grid md:grid-cols-[1fr,auto] gap-3 mb-6 items-stretch">
+        <div class="panel rounded-lg p-4" style="min-width:0">
+          <h3 class="font-bold text-sm mb-3">مدفوع مقابل غير مدفوع لكل فرع</h3>
+          <div style="position:relative; height:220px">
+            <canvas id="branchChart"></canvas>
+          </div>
+          <p class="text-xs muted mt-2" id="branchChartEmpty"></p>
+        </div>
+        <div class="panel rounded-lg p-4 flex flex-col items-center justify-center gap-2 text-center" style="min-width:150px">
+          <span class="text-xs muted">نسبة التحصيل الحالية</span>
+          <div class="rate-ring" id="ovRateRing" style="position:relative">
+            <div class="rate-ring-inner">
+              <span class="text-xl font-cairo font-extrabold tabular" id="ovRateText" style="color:var(--gold)">—</span>
+            </div>
+          </div>
+          <span class="text-xs muted">من إجمالي المستحقات المستحقة فعلياً</span>
+        </div>
+      </div>
+
+      <div class="flex items-center justify-between mb-2">
+        <h3 class="font-bold text-sm">ملخص الفروع</h3>
+        <select id="branchFilter" class="field text-xs rounded-lg px-2 py-1.5">
+          <option value="">كل الفروع</option>
+        </select>
+      </div>
+      <div id="branchSummaryBox" class="space-y-2"></div>
+    </section>
+
+    <!-- تبويب: تسجيل لاعب -->
+    <section class="tab-panel" data-tab="register">
+      <h2 class="text-xl font-cairo font-extrabold mb-4">تسجيل لاعب جديد</h2>
+      <form id="registerForm" class="panel rounded-lg p-5 space-y-3 max-w-xl">
+        <div><label class="block text-xs muted mb-1">اسم اللاعب</label>
+          <input required name="name" class="field w-full rounded-lg px-3 py-2" /></div>
+        <div><label class="block text-xs muted mb-1">الفرع</label>
+          <select required name="branch" class="branch-select field w-full rounded-lg px-3 py-2"></select></div>
+        <div><label class="block text-xs muted mb-1">المستوى / الحزام</label>
+          <input name="level" class="field w-full rounded-lg px-3 py-2" /></div>
+        <div><label class="block text-xs muted mb-1">اسم ولي الأمر</label>
+          <input name="parentName" class="field w-full rounded-lg px-3 py-2" /></div>
+        <div><label class="block text-xs muted mb-1">رقم هاتف ولي الأمر (واتساب)</label>
+          <input required name="parentPhone" placeholder="01012345678" class="field w-full rounded-lg px-3 py-2" /></div>
+        <div><label class="block text-xs muted mb-1">ملاحظات</label>
+          <textarea name="notes" class="field w-full rounded-lg px-3 py-2"></textarea></div>
+        <button type="submit" class="btn-primary w-full py-2.5 rounded-lg">تسجيل اللاعب</button>
+      </form>
+      <h3 class="font-bold mt-8 mb-2 text-sm">قائمة اللاعبين</h3>
+      <div class="overflow-x-auto panel rounded-lg">
+        <table class="w-full text-sm" id="playersTable"></table>
+      </div>
+    </section>
+
+    <!-- تبويب: الحضور -->
+    <section class="tab-panel" data-tab="attendance">
+      <h2 class="text-xl font-cairo font-extrabold mb-4">تسجيل الحضور</h2>
+      <div class="flex flex-wrap gap-3 mb-4">
+        <select id="attBranch" class="branch-select field rounded-lg px-3 py-2"></select>
+        <input type="date" id="attDate" class="field rounded-lg px-3 py-2" />
+        <button id="attSaveBtn" class="btn-primary px-5 py-2 rounded-lg">حفظ الحضور</button>
+      </div>
+      <div id="attList" class="space-y-2"></div>
+    </section>
+
+    <!-- تبويب: المستحقات والمدفوعات -->
+    <section class="tab-panel" data-tab="dues">
+      <h2 class="text-xl font-cairo font-extrabold mb-4">المستحقات والمدفوعات</h2>
+      <div class="panel rounded-lg p-5 space-y-3 max-w-xl mb-6">
+        <h3 class="font-bold text-sm" style="color:var(--accent-strong)">إضافة مستحق جديد</h3>
+        <div class="grid grid-cols-2 gap-3">
+          <select id="dueTargetType" class="field rounded-lg px-3 py-2">
+            <option value="player">لاعب واحد</option>
+            <option value="branch">فرع كامل</option>
+          </select>
+          <select id="dueType" class="field rounded-lg px-3 py-2">
+            <option value="اشتراك شهري">اشتراك شهري</option>
+            <option value="تسجيل">رسوم تسجيل</option>
+            <option value="اختبار">رسوم اختبار</option>
+          </select>
+        </div>
+        <select id="duePlayerSelect" class="player-select field w-full rounded-lg px-3 py-2"></select>
+        <select id="dueBranchSelect" class="branch-select field w-full rounded-lg px-3 py-2 hidden"></select>
+        <div class="grid grid-cols-2 gap-3">
+          <input id="dueAmount" type="number" placeholder="المبلغ (ج.م)" class="field rounded-lg px-3 py-2" />
+          <input id="dueDate" type="date" class="field rounded-lg px-3 py-2" />
+        </div>
+        <input id="dueDescription" placeholder="وصف/ملاحظة (اختياري)" class="field w-full rounded-lg px-3 py-2" />
+        <button id="dueAddBtn" class="btn-primary w-full py-2.5 rounded-lg">إضافة المستحق</button>
+      </div>
+      <h3 class="font-bold mb-2 text-sm">كل السجلات</h3>
+      <div class="overflow-x-auto panel rounded-lg">
+        <table class="w-full text-sm" id="duesTable"></table>
+      </div>
+    </section>
+
+    <!-- تبويب: التواصل مع أولياء الأمور -->
+    <section class="tab-panel" data-tab="broadcast">
+      <h2 class="text-xl font-cairo font-extrabold mb-4">التواصل عبر واتساب</h2>
+      <p class="text-xs muted mb-4">يتم تجهيز نص الرسالة تلقائياً لكل لاعب، ثم تفتح جاهزة على واتساب — يلزم ضغطة "إرسال" يدوية داخل واتساب لكل رسالة.</p>
+      <div id="broadcastList" class="space-y-2"></div>
+    </section>
+
+    <!-- تبويب: سجل العمليات -->
+    <section class="tab-panel" data-tab="log">
+      <h2 class="text-xl font-cairo font-extrabold mb-4">سجل العمليات</h2>
+      <div id="logList" class="space-y-1 text-sm panel rounded-lg p-2"></div>
+    </section>
+
+    <!-- تبويب: الفروع -->
+    <section class="tab-panel" data-tab="branches">
+      <h2 class="text-xl font-cairo font-extrabold mb-4">إدارة الفروع</h2>
+      <form id="branchForm" class="flex gap-2 max-w-md mb-6">
+        <input required id="newBranchName" placeholder="اسم الفرع الجديد" class="field flex-1 rounded-lg px-3 py-2" />
+        <button class="btn-primary px-5 py-2 rounded-lg">إضافة</button>
+      </form>
+      <ul id="branchesListUl" class="space-y-1 text-sm"></ul>
+    </section>
+
+  </main>
+
+  <div id="toast" class="fixed text-sm font-bold px-4 py-2.5 rounded-lg opacity-0 pointer-events-none transition-opacity duration-300 z-50"
+       style="bottom:max(1.25rem, env(safe-area-inset-bottom, 0px)); left:max(1.25rem, env(safe-area-inset-left, 0px)); background:var(--accent); color:var(--accent-ink); box-shadow:var(--shadow)"></div>
+
+  <script>
+    // ====================================================================
+    // هذا الملف مشترك لكل الأكاديميات — يُنشر مرة واحدة فقط (كصفحة واحدة).
+    // ضع هنا رابط الـ Web App المركزي (يُملأ مرة واحدة في حياة المشروع كله).
+    // ====================================================================
+    const API_URL = ''; // Set only to an approved staging deployment after identity integration.
+
+    // كود الأكاديمية يُقرأ من آخر رابط الصفحة بعد علامة # (مثال: ...#ACAD_001)
+    const ACADEMY_CODE = decodeURIComponent(window.location.hash.slice(1) || '');
+
+    const state = { players: [], branches: [], dues: [] };
+    let branchChartInstance = null;
+
+    if (!API_URL) {
+      document.body.innerHTML = '<main dir="rtl" style="max-width:600px;margin:50px auto;padding:24px"><h1>CaptainPro: نسخة تجهيز</h1><p>استرجعنا التنفيذ الموجود. لم نربط هذه النسخة بحسابات أو بيانات حقيقية، ولم ننشرها.</p><p>قبل التشغيل: تفعيل هوية المستخدم وصلاحيات الأكاديمية، إعداد خادم اختبار منفصل، ثم اختبار الحفظ والاسترجاع.</p><p>راجع دليل التشغيل المرفق. رفع الصفحة وحده لا يجعل الخدمة جاهزة للبيع.</p></main>';
+      throw new Error('staging_not_configured');
+    }
+    if (!ACADEMY_CODE) {
+      document.body.innerHTML = '<div style="padding:3rem;text-align:center;color:#DC2626;font-weight:700">رابط غير صالح: كود الأكاديمية مفقود من الرابط.</div>';
+      throw new Error('missing academy code');
+    }
+
+    function esc(v) { return String(v == null ? '' : v).replace(/[&<>\"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',"'":'&#39;'}[c])); }
+    window.addEventListener('unhandledrejection', e => { e.preventDefault(); showToast(e.reason?.message || 'تعذر تنفيذ الطلب'); });
+    function showToast(msg) {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.classList.remove('opacity-0');
+      setTimeout(() => t.classList.add('opacity-0'), 2500);
+    }
+
+    // ---------- اتصال بالسيرفر (كود الأكاديمية يُرفق تلقائياً مع كل طلب) ----------
+    async function apiGet(action, params = {}) {
+      if (!API_URL) throw new Error('نسخة تجهيز محلية: لم يُضبط خادم اختبار موثق بعد.');
+      const qs = new URLSearchParams({ action, academy: ACADEMY_CODE, ...params }).toString();
+      const res = await fetch(`${API_URL}?${qs}`);
+      const json = await res.json();
+      handleLicense(json);
+      if (json.status !== 'ok') throw new Error(json.message || 'تعذر تنفيذ الطلب');
+      return json;
+    }
+
+    async function apiPost(action, payload = {}) {
+      if (!API_URL) throw new Error('نسخة تجهيز محلية: لم يُضبط خادم اختبار موثق بعد.');
+      const res = await fetch(API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' }, // يتجنب مشاكل CORS مع Apps Script
+        body: JSON.stringify({ action, academy: ACADEMY_CODE, ...payload })
+      });
+      const json = await res.json();
+      handleLicense(json);
+      if (json.status !== 'ok') throw new Error(json.message || 'تعذر تنفيذ الطلب');
+      return json;
+    }
+
+    function handleLicense(json) {
+      const banner = document.getElementById('licenseBanner');
+      if (json.status === 'license_expired' || json.code === 'LICENSE_EXPIRED') {
+        banner.textContent = json.message || 'تم إيقاف البوابة. تواصل مع الإدارة.';
+        banner.classList.remove('hidden');
+        throw new Error('license_expired');
+      } else if (json.licenseWarning) {
+        banner.textContent = json.licenseWarning;
+        banner.classList.remove('hidden');
+      } else {
+        banner.classList.add('hidden');
+      }
+    }
+
+    // ---------- التبويبات ----------
+    const ICONS = {
+      overview: '<path d="M12 21a9 9 0 1 0-9-9"/><path d="M12 12l4-4"/><path d="M3 12h2M12 3v2"/>',
+      register: '<circle cx="8.5" cy="8" r="3"/><path d="M2 20c0-3.3 2.7-6 6.5-6S15 16.7 15 20"/><circle cx="17" cy="8" r="2.4"/><path d="M15.5 14.3c2.6.4 4.5 2.7 4.5 5.7"/>',
+      attendance: '<circle cx="12" cy="12" r="9"/><path d="M8.5 12.5l2.3 2.3L16 10"/>',
+      dues: '<rect x="3" y="6" width="18" height="13" rx="2"/><path d="M3 10h18"/><circle cx="16.5" cy="14.5" r="1.3"/>',
+      broadcast: '<path d="M21 12a8 8 0 1 1-3.2-6.4"/><path d="M8.5 12l2.5 2.5L16 9"/>',
+      log: '<path d="M4 6h16M4 12h16M4 18h10"/>',
+      branches: '<path d="M12 21s7-6.6 7-11.5A7 7 0 0 0 5 9.5C5 14.4 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.3"/>'
+    };
+    const TABS = [
+      { id: 'overview', label: 'نظرة عامة' },
+      { id: 'register', label: 'اللاعبون' },
+      { id: 'attendance', label: 'الحضور' },
+      { id: 'dues', label: 'المستحقات' },
+      { id: 'broadcast', label: 'واتساب' },
+      { id: 'log', label: 'سجل العمليات' },
+      { id: 'branches', label: 'الفروع' }
+    ];
+
+    function iconSvg(id) {
+      return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${ICONS[id]}</svg>`;
+    }
+
+    function renderTabs() {
+      const nav = document.getElementById('tabNav');
+      nav.innerHTML = TABS.map(t => `<button data-tab="${t.id}" class="tab-btn px-3 py-1.5 rounded-lg text-xs">${iconSvg(t.id)}<span>${t.label}</span></button>`).join('');
+      nav.querySelectorAll('.tab-btn').forEach(btn => btn.addEventListener('click', () => switchTab(btn.dataset.tab)));
+      switchTab('overview');
+    }
+
+    function switchTab(id) {
+      document.querySelectorAll('.tab-panel').forEach(p => {
+        const isActive = p.dataset.tab === id;
+        p.classList.toggle('active', isActive);
+      });
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === id));
+      if (id === 'overview') loadOverview();
+      if (id === 'register') loadPlayers();
+      if (id === 'attendance') loadAttendanceScreen();
+      if (id === 'dues') loadDues();
+      if (id === 'broadcast') loadBroadcast();
+      if (id === 'log') loadLog();
+      if (id === 'branches') loadBranchesScreen();
+    }
+
+    // ---------- تحميل بيانات أساسية (فروع + لاعبين) لكل القوائم المنسدلة ----------
+    async function refreshCore() {
+      const [branchesRes, playersRes] = await Promise.all([apiGet('branches'), apiGet('players')]);
+      state.branches = branchesRes.data || [];
+      state.players = playersRes.data || [];
+      document.querySelectorAll('.branch-select').forEach(sel => {
+        sel.innerHTML = state.branches.map(b => `<option value="${esc(b)}">${esc(b)}</option>`).join('') || '<option value="">لا يوجد فروع بعد</option>';
+      });
+      document.querySelectorAll('.player-select').forEach(sel => {
+        sel.innerHTML = state.players.map(p => `<option value="${esc(p.id)}">${esc(p.name)} (${esc(p.branch)})</option>`).join('') || '<option value="">لا يوجد لاعبون بعد</option>';
+      });
+      const branchFilter = document.getElementById('branchFilter');
+      if (branchFilter) {
+        branchFilter.innerHTML = '<option value="">كل الفروع</option>' + state.branches.map(b => `<option value="${esc(b)}">${esc(b)}</option>`).join('');
+      }
+    }
+
+    // ---------- أرقام متحركة (حركة واحدة منظمة عند تحميل النظرة العامة) ----------
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    function animateNumber(el, to, { prefix = '', suffix = '', duration = 700 } = {}) {
+      const from = 0;
+      if (prefersReducedMotion || !Number.isFinite(to)) {
+        el.textContent = prefix + (Number(to) || 0).toLocaleString('ar-EG') + suffix;
+        return;
+      }
+      const start = performance.now();
+      function tick(now) {
+        const p = Math.min(1, (now - start) / duration);
+        const eased = 1 - Math.pow(1 - p, 3);
+        const val = Math.round(from + (to - from) * eased);
+        el.textContent = prefix + val.toLocaleString('ar-EG') + suffix;
+        if (p < 1) requestAnimationFrame(tick);
+      }
+      requestAnimationFrame(tick);
+    }
+
+    // ---------- نظرة عامة ----------
+    async function loadOverview() {
+      await refreshCore();
+      const { data } = await apiGet('overview');
+      animateNumber(document.getElementById('ovTotalPlayers'), data.totalPlayers);
+      animateNumber(document.getElementById('ovCollected'), data.collected, { suffix: ' ج.م' });
+      animateNumber(document.getElementById('ovOverdue'), data.overdue, { suffix: ' ج.م' });
+      animateNumber(document.getElementById('ovUpcoming'), data.upcoming, { suffix: ' ج.م' });
+      renderBranchSummary(data.branchSummary);
+      renderBranchChart(data.branchSummary);
+      renderCollectionRate(data.collected, data.overdue);
+    }
+
+    function renderCollectionRate(collected, overdue) {
+      const due = (Number(collected) || 0) + (Number(overdue) || 0);
+      const pct = due > 0 ? Math.round((Number(collected) || 0) / due * 100) : 100;
+      const ring = document.getElementById('ovRateRing');
+      const text = document.getElementById('ovRateText');
+      if (prefersReducedMotion) {
+        ring.style.setProperty('--pct', pct);
+        text.textContent = pct + '%';
+        return;
+      }
+      let current = 0;
+      const start = performance.now();
+      function tick(now) {
+        const p = Math.min(1, (now - start) / 900);
+        const eased = 1 - Math.pow(1 - p, 3);
+        current = Math.round(pct * eased);
+        ring.style.setProperty('--pct', current);
+        text.textContent = current + '%';
+        if (p < 1) requestAnimationFrame(tick);
+      }
+      requestAnimationFrame(tick);
+    }
+
+    function renderBranchChart(list) {
+      const canvas = document.getElementById('branchChart');
+      const emptyNote = document.getElementById('branchChartEmpty');
+      if (branchChartInstance) { branchChartInstance.destroy(); branchChartInstance = null; }
+      if (!list || list.length === 0) {
+        emptyNote.textContent = 'لا توجد بيانات فروع بعد لعرضها على الرسم البياني.';
+        return;
+      }
+      emptyNote.textContent = '';
+      const style = getComputedStyle(document.documentElement);
+      const good = style.getPropertyValue('--good').trim() || '#15803D';
+      const warn = style.getPropertyValue('--warn').trim() || '#B45309';
+      const muted = style.getPropertyValue('--muted').trim() || '#5B6D69';
+      const border = style.getPropertyValue('--border').trim() || '#D7E0DE';
+      branchChartInstance = new Chart(canvas.getContext('2d'), {
+        type: 'bar',
+        data: {
+          labels: list.map(b => b.branch),
+          datasets: [
+            { label: 'مدفوع', data: list.map(b => b.paidCount), backgroundColor: good, borderRadius: 4, maxBarThickness: 28 },
+            { label: 'غير مدفوع', data: list.map(b => b.unpaidCount), backgroundColor: warn, borderRadius: 4, maxBarThickness: 28 }
+          ]
+        },
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          animation: { duration: prefersReducedMotion ? 0 : 650 },
+          scales: {
+            x: { ticks: { color: muted, font: { family: 'Tajawal' } }, grid: { display: false } },
+            y: { beginAtZero: true, ticks: { color: muted, precision: 0 }, grid: { color: border } }
+          },
+          plugins: {
+            legend: { position: 'bottom', rtl: true, labels: { color: muted, font: { family: 'Tajawal' }, boxWidth: 12, boxHeight: 12 } },
+            tooltip: { rtl: true, titleFont: { family: 'Cairo' }, bodyFont: { family: 'Tajawal' } }
+          }
+        }
+      });
+    }
+
+    function renderBranchSummary(list) {
+      const box = document.getElementById('branchSummaryBox');
+      const filter = document.getElementById('branchFilter').value;
+      const filtered = filter ? list.filter(b => b.branch === filter) : list;
+      box.innerHTML = filtered.map(b => `
+        <div class="panel rounded-lg p-4 flex flex-wrap items-center justify-between gap-2">
+          <span class="font-bold">${esc(b.branch)}</span>
+          <span class="text-xs muted">لاعبون: ${b.playerCount}</span>
+          <span class="text-xs" style="color:var(--good)">مدفوع: ${b.paidCount}</span>
+          <span class="text-xs" style="color:var(--warn)">غير مدفوع: ${b.unpaidCount}</span>
+          <span class="text-xs" style="color:var(--critical)">مستحق: ${fmtMoney(b.totalDue)}</span>
+        </div>`).join('') || '<p class="text-xs muted">لا توجد بيانات بعد.</p>';
+    }
+    document.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('branchFilter')?.addEventListener('change', loadOverview);
+    });
+
+    function fmtMoney(n) { return (Number(n) || 0).toLocaleString('ar-EG') + ' ج.م'; }
+
+    // ---------- اللاعبون ----------
+    async function loadPlayers() {
+      await refreshCore();
+      const tbl = document.getElementById('playersTable');
+      tbl.innerHTML = `<tr class="text-right text-xs muted" style="border-bottom:1px solid var(--border)">
+          <th class="py-2 px-3">الاسم</th><th>الفرع</th><th>المستوى</th><th>ولي الأمر</th><th></th></tr>` +
+        state.players.map(p => `
+          <tr class="row-hover" style="border-bottom:1px solid var(--border)">
+            <td class="py-2 px-3">${esc(p.name)}</td><td>${esc(p.branch)}</td><td>${esc(p.level || '-')}</td><td>${esc(p.parentName || '-')}</td>
+            <td><button data-id="${esc(p.id)}" class="delPlayerBtn link-danger text-xs hover:underline">حذف</button></td>
+          </tr>`).join('');
+      tbl.querySelectorAll('.delPlayerBtn').forEach(btn => btn.addEventListener('click', async () => {
+        if (!confirm('تأكيد حذف اللاعب؟')) return;
+        await apiPost('deletePlayer', { playerId: btn.dataset.id });
+        showToast('تم حذف اللاعب');
+        loadPlayers();
+      }));
+    }
+
+    document.getElementById('registerForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const fd = new FormData(e.target);
+      const body = Object.fromEntries(fd.entries());
+      await apiPost('registerPlayer', body);
+      showToast('تم تسجيل اللاعب بنجاح');
+      e.target.reset();
+      loadPlayers();
+    });
+
+    // ---------- الحضور ----------
+    async function loadAttendanceScreen() {
+      await refreshCore();
+      document.getElementById('attDate').value = new Date().toISOString().slice(0, 10);
+      renderAttList();
+      document.getElementById('attBranch').onchange = renderAttList;
+    }
+
+    function renderAttList() {
+      const branch = document.getElementById('attBranch').value;
+      const players = state.players.filter(p => p.branch === branch);
+      document.getElementById('attList').innerHTML = players.map(p => `
+        <div class="panel rounded-lg p-3 flex items-center justify-between">
+          <span>${esc(p.name)}</span>
+          <select data-id="${esc(p.id)}" data-name="${esc(p.name)}" class="attStatusSelect field rounded-lg px-2 py-1 text-sm">
+            <option value="حاضر">حاضر</option>
+            <option value="غائب">غائب</option>
+          </select>
+        </div>`).join('') || '<p class="text-xs muted">اختر فرعاً لعرض لاعبيه.</p>';
+    }
+
+    document.getElementById('attSaveBtn').addEventListener('click', async () => {
+      const branch = document.getElementById('attBranch').value;
+      const date = document.getElementById('attDate').value;
+      const records = Array.from(document.querySelectorAll('.attStatusSelect')).map(s => ({
+        playerId: s.dataset.id, playerName: s.dataset.name, status: s.value
+      }));
+      if (records.length === 0) { showToast('لا يوجد لاعبون في هذا الفرع'); return; }
+      await apiPost('logAttendance', { branch, date, records });
+      showToast('تم حفظ الحضور');
+    });
+
+    // ---------- المستحقات ----------
+    async function loadDues() {
+      await refreshCore();
+      document.getElementById('dueDate').value = new Date().toISOString().slice(0, 10);
+      await apiGet('playerDues', {});
+      renderDuesTable();
+    }
+
+    document.getElementById('dueTargetType').addEventListener('change', (e) => {
+      const isPlayer = e.target.value === 'player';
+      document.getElementById('duePlayerSelect').classList.toggle('hidden', !isPlayer);
+      document.getElementById('dueBranchSelect').classList.toggle('hidden', isPlayer);
+    });
+
+    document.getElementById('dueAddBtn').addEventListener('click', async () => {
+      const targetType = document.getElementById('dueTargetType').value;
+      const body = {
+        type: document.getElementById('dueType').value,
+        amount: document.getElementById('dueAmount').value,
+        dueDate: document.getElementById('dueDate').value,
+        description: document.getElementById('dueDescription').value
+      };
+      if (targetType === 'player') body.playerId = document.getElementById('duePlayerSelect').value;
+      else body.branch = document.getElementById('dueBranchSelect').value;
+
+      await apiPost('addDue', body);
+      showToast('تم إضافة المستحق');
+      renderDuesTable();
+    });
+
+    async function renderDuesTable() {
+      // نجلب كل اللاعبين ثم مستحقات كل واحد (مناسب لعدد لاعبين متوسط؛ للأعداد الكبيرة يُستحسن إضافة endpoint "allDues")
+      const tbl = document.getElementById('duesTable');
+      tbl.innerHTML = `<tr class="text-right text-xs muted" style="border-bottom:1px solid var(--border)">
+        <th class="py-2 px-3">اللاعب</th><th>النوع</th><th>المبلغ</th><th>الاستحقاق</th><th>الحالة</th><th></th></tr>`;
+      let rowsHtml = '';
+      for (const p of state.players) {
+        const res = await apiGet('playerDues', { playerId: p.id });
+        (res.data || []).forEach(d => {
+          rowsHtml += `<tr class="row-hover" style="border-bottom:1px solid var(--border)">
+            <td class="py-2 px-3">${esc(d.playerName)}</td><td>${esc(d.type)}</td><td>${fmtMoney(d.amount)}</td>
+            <td>${esc(d.dueDate)}</td>
+            <td style="color:${d.status === 'مدفوع' ? 'var(--good)' : 'var(--critical)'}">${esc(d.status)}</td>
+            <td class="flex gap-2 py-2">
+              ${d.status !== 'مدفوع' ? `<button data-id="${esc(d.dueId)}" class="markPaidBtn link-action text-xs hover:underline" style="color:var(--good)">تأكيد سداد</button>` : ''}
+              <button data-id="${esc(d.dueId)}" class="delDueBtn link-danger text-xs hover:underline">حذف</button>
+            </td></tr>`;
+        });
+      }
+      tbl.innerHTML += rowsHtml;
+      tbl.querySelectorAll('.markPaidBtn').forEach(btn => btn.addEventListener('click', async () => {
+        await apiPost('markPaid', { dueId: btn.dataset.id });
+        showToast('تم تأكيد السداد');
+        renderDuesTable();
+      }));
+      tbl.querySelectorAll('.delDueBtn').forEach(btn => btn.addEventListener('click', async () => {
+        if (!confirm('تأكيد حذف السجل؟')) return;
+        await apiPost('deleteDue', { dueId: btn.dataset.id });
+        showToast('تم الحذف');
+        renderDuesTable();
+      }));
+    }
+
+    // ---------- التواصل واتساب ----------
+    async function loadBroadcast() {
+      await refreshCore();
+      const res = await apiGet('broadcastList');
+      const list = res.data || [];
+      document.getElementById('broadcastList').innerHTML = list.map(p => {
+        const msg = buildWaMessage(p);
+        const phone = String(p.parentPhone || '').replace(/\D/g, '');
+        const link = phone ? `https://wa.me/${phone}?text=${encodeURIComponent(msg)}` : '#';
+        return `<div class="panel rounded-lg p-4 flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <span class="font-bold">${esc(p.name)}</span>
+            <span class="text-xs muted block">${esc(p.branch)} — متأخرات: ${fmtMoney(p.unpaidAmount)} — غياب هذا الشهر: ${p.absencesThisMonth} يوم</span>
+          </div>
+          <a href="${link}" target="_blank" rel="noopener" class="btn-primary px-4 py-2 rounded-lg text-xs">فتح رسالة واتساب</a>
+        </div>`;
+      }).join('') || '<p class="text-xs muted">لا يوجد لاعبون بعد.</p>';
+    }
+
+    function buildWaMessage(p) {
+      return [
+        `مرحباً ولي أمر اللاعب ${p.name}،`,
+        `نود إطلاعكم على ملخص المتابعة الشهري:`,
+        `- المستحقات غير المسددة: ${fmtMoney(p.unpaidAmount)}`,
+        `- عدد أيام الغياب هذا الشهر: ${p.absencesThisMonth} يوم`,
+        `نشكر تعاونكم المستمر، إدارة الأكاديمية.`
+      ].join('\n');
+    }
+
+    // ---------- سجل العمليات ----------
+    async function loadLog() {
+      const res = await apiGet('activityLog');
+      document.getElementById('logList').innerHTML = (res.data || []).map(l => `
+        <div class="flex justify-between text-xs py-1.5 px-2" style="border-bottom:1px solid var(--border)">
+          <span class="muted">${esc(l.datetime)}</span>
+          <span class="font-bold" style="color:var(--accent-strong)">${esc(l.type)}</span>
+          <span>${esc(l.details)}</span>
+        </div>`).join('') || '<p class="text-xs muted p-2">لا توجد عمليات مسجلة بعد.</p>';
+    }
+
+    // ---------- الفروع ----------
+    async function loadBranchesScreen() {
+      await refreshCore();
+      document.getElementById('branchesListUl').innerHTML = state.branches.map(b => `<li class="panel rounded-lg px-4 py-2">${esc(b)}</li>`).join('') || '<li class="text-xs muted">لا يوجد فروع بعد.</li>';
+    }
+
+    document.getElementById('branchForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const name = document.getElementById('newBranchName').value.trim();
+      if (!name) return;
+      await apiPost('addBranch', { name });
+      showToast('تم إضافة الفرع');
+      e.target.reset();
+      loadBranchesScreen();
+    });
+
+    // ---------- بدء التشغيل ----------
+    renderTabs();
+  </script>
+</div>
+
+</body></html>
