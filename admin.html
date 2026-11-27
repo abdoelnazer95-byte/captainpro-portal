@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>لوحة إدارة CaptainPro — خاصة بك فقط</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@700;800&family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet" />
+  <style>
+    body { font-family: 'Tajawal', sans-serif; background-color: #0f172a; color: #f8fafc; }
+    h1, h2, .font-cairo { font-family: 'Cairo', sans-serif; }
+  </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+  <div class="w-full max-w-lg bg-slate-800/70 border border-slate-700 rounded-3xl p-6 sm:p-8 space-y-4">
+    <div class="text-center space-y-1">
+      <h1 class="text-xl font-cairo font-extrabold text-white">لوحة إدارة CaptainPro</h1>
+      <p class="text-xs text-rose-400 font-bold">هذه الصفحة خاصة بك فقط — لا تشاركها مع أي عميل</p>
+    </div>
+
+    <form id="createForm" class="space-y-3">
+      <div>
+        <label class="block text-xs text-slate-400 mb-1">كلمة السر الإدارية</label>
+        <input required type="password" id="adminSecret" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2" />
+      </div>
+      <div>
+        <label class="block text-xs text-slate-400 mb-1">اسم الأكاديمية</label>
+        <input required id="name" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2" />
+      </div>
+      <div>
+        <label class="block text-xs text-slate-400 mb-1">اسم المسؤول</label>
+        <input id="ownerName" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2" />
+      </div>
+      <div>
+        <label class="block text-xs text-slate-400 mb-1">رقم الهاتف</label>
+        <input id="phone" placeholder="01012345678" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2" />
+      </div>
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="block text-xs text-slate-400 mb-1">الباقة</label>
+          <select id="plan" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2">
+            <option value="الأساسية">الأساسية (600)</option>
+            <option value="الاحتراف">الاحتراف (1200)</option>
+            <option value="تجربة مجانية">تجربة مجانية (0)</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-xs text-slate-400 mb-1">قيمة الاشتراك (ج.م)</label>
+          <input id="price" type="number" value="600" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2" />
+        </div>
+      </div>
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="block text-xs text-slate-400 mb-1">مدة الاشتراك (أيام)</label>
+          <input id="durationDays" type="number" value="30" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2" />
+        </div>
+        <div>
+          <label class="block text-xs text-slate-400 mb-1">فترة السماح (أيام)</label>
+          <input id="graceDays" type="number" value="5" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2" />
+        </div>
+      </div>
+      <div>
+        <label class="block text-xs text-slate-400 mb-1">كود الأكاديمية (اتركه فاضي للتوليد التلقائي)</label>
+        <input id="code" placeholder="مثال: ACAD_004" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2" />
+      </div>
+      <button type="submit" id="submitBtn" class="w-full py-3 rounded-xl bg-teal-600 hover:bg-teal-500 font-bold transition">تسجيل الأكاديمية وإنشاء الروابط</button>
+    </form>
+
+    <div id="resultBox" class="hidden bg-emerald-950/40 border border-emerald-700 rounded-2xl p-4 space-y-2 text-sm">
+      <p class="font-bold text-emerald-300">تم تسجيل الأكاديمية بنجاح ✅</p>
+      <div>
+        <span class="text-xs text-slate-400 block">كود الأكاديمية</span>
+        <code id="resCode" class="text-teal-300"></code>
+      </div>
+      <div>
+        <span class="text-xs text-slate-400 block">رابط البوابة (أرسله للعميل)</span>
+        <div class="flex gap-2 items-center">
+          <input id="resPortalLink" readonly class="flex-1 bg-slate-900 border border-slate-700 rounded-lg px-2 py-1.5 text-xs" />
+          <button id="copyPortalBtn" class="px-3 py-1.5 rounded-lg bg-teal-600 hover:bg-teal-500 text-xs font-bold">نسخ</button>
+        </div>
+      </div>
+      <div>
+        <span class="text-xs text-slate-400 block">رابط شيت بيانات الأكاديمية (لك إنت)</span>
+        <a id="resSheetLink" target="_blank" class="text-xs text-sky-400 hover:underline break-all"></a>
+      </div>
+    </div>
+
+    <div id="errorBox" class="hidden bg-rose-950/40 border border-rose-700 rounded-xl p-3 text-xs text-rose-300"></div>
+  </div>
+
+  <script>
+    // ضع هنا نفس رابط الـ Web App المركزي المستخدم في portal.html
+    const API_URL = 'https://script.google.com/macros/s/AKfycbz5tmgH4qg6u9xNtS09Lxnkqsvstwl66dTDSpq-kyrbv-f7OKUALncwGWnSF-dsauzJ/exec';
+    // ضع هنا رابط صفحة البوابة المنشورة (portal.html) بعد نشرها
+    const PORTAL_PAGE_URL = 'https://abdoelnazer95-byte.github.io/captainpro-portal/';
+
+    document.getElementById('createForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById('submitBtn');
+      btn.disabled = true;
+      btn.textContent = 'جارٍ الإنشاء...';
+      document.getElementById('errorBox').classList.add('hidden');
+      document.getElementById('resultBox').classList.add('hidden');
+
+      const payload = {
+        action: 'createAcademy',
+        adminSecret: document.getElementById('adminSecret').value,
+        name: document.getElementById('name').value,
+        ownerName: document.getElementById('ownerName').value,
+        phone: document.getElementById('phone').value,
+        plan: document.getElementById('plan').value,
+        price: document.getElementById('price').value,
+        durationDays: document.getElementById('durationDays').value,
+        graceDays: document.getElementById('graceDays').value,
+        code: document.getElementById('code').value
+      };
+
+      try {
+        const res = await fetch(API_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify(payload)
+        });
+        const json = await res.json();
+        if (json.status !== 'ok') throw new Error(json.message || 'حدث خطأ غير معروف');
+
+        const code = json.result.code;
+        const portalLink = `${PORTAL_PAGE_URL}#${code}`;
+        document.getElementById('resCode').textContent = code;
+        document.getElementById('resPortalLink').value = portalLink;
+        document.getElementById('resSheetLink').textContent = json.result.spreadsheetUrl;
+        document.getElementById('resSheetLink').href = json.result.spreadsheetUrl;
+        document.getElementById('resultBox').classList.remove('hidden');
+        e.target.reset();
+      } catch (err) {
+        document.getElementById('errorBox').textContent = 'خطأ: ' + err.message;
+        document.getElementById('errorBox').classList.remove('hidden');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'تسجيل الأكاديمية وإنشاء الروابط';
+      }
+    });
+
+    document.getElementById('copyPortalBtn').addEventListener('click', () => {
+      const input = document.getElementById('resPortalLink');
+      input.select();
+      navigator.clipboard?.writeText(input.value);
+    });
+  </script>
+</body>
+</html>
